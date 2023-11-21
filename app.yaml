@@ -1,0 +1,39 @@
+# App Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app
+        image: gcr.io/neon-camera-252202/app:v1
+        env:
+        - name: DATABASE_URL
+          value: postgres://devuser:123456@db/counterdb
+        - name: KAFKA_SERVERS
+          value: kafka:9092
+        ports:
+        - containerPort: 8000
+
+---
+# App Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app
+spec:
+  selector:
+    app: my-app
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000

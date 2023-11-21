@@ -1,0 +1,41 @@
+# PostgreSQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - name: db
+        image: postgres:latest
+        env:
+        - name: POSTGRES_USER
+          value: devuser
+        - name: POSTGRES_PASSWORD
+          value: "123456"
+        - name: POSTGRES_DB
+          value: counterdb
+        ports:
+        - containerPort: 5432
+
+---
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+spec:
+  selector:
+    app: db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

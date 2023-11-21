@@ -1,0 +1,47 @@
+version: '1'
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - kafka
+      - migrations
+    environment:
+      DATABASE_URL: postgres://devuser:123456@db/counterdb
+      KAFKA_SERVERS: kafka:9092
+
+  migrations:
+    build: .
+    command: diesel migration run
+    volumes:
+      - ./migrations:/migrations
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://devuser:123456@db/counterdb
+    entrypoint: ["/usr/local/bin/diesel"]
+    working_dir: /migrations
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: counterdb
+
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper

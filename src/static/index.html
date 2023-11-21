@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <div id="counter"></div>
+    <button id="increment">Increment Counter</button>
+
+    <div>Admin Config String</div>
+    <label id="configText"></label>
+    <br/>
+    <input id="config"></input>
+    <button id="update">Update Config</button>
+
+    <script>
+        function updateCounter() {
+            fetch('/api/counter')
+                .then(response => response.json())
+                .then(data => document.getElementById('counter').textContent = data.count)
+                .catch(error => console.error('Error:', error));
+        }
+
+        document.getElementById('increment').addEventListener('click', function() {
+            fetch('/api/counter/increment', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => updateCounter())
+                .catch(error => console.error('Error:', error));
+        });
+
+        function updateConfig() {
+            fetch('/api/config')
+                .then(response => response.json())
+                .then(data => document.getElementById('configText').textContent = data.text_string)
+                .catch(error => console.error('Error:', error));
+        }
+
+        document.getElementById('update').addEventListener('click', function() {
+            fetch('/api/config/update', 
+            { 
+                method: 'POST', 
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: 1, text_string: document.getElementById('config').value, user_role: 'note-admin' }) 
+            })
+            .then(response => response.json())
+            .then(data => updateConfig())
+            .catch(error => console.error('Error:', error));
+        });
+
+        updateConfig();
+        updateCounter();
+        // Update the counter every second
+        // setInterval(updateCounter, 10000);
+    </script>
+</body>
+</html>
